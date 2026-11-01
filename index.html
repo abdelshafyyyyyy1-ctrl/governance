@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Governance Submissions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Hanken+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--tx:#1a2230;--mu:#667085;--bd:#e2e5eb;--ac:#1f6feb;--soft:#e8f0fe;--ok:#12805c;--er:#c0392b;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11151c;--card:#1a202a;--tx:#e8ecf3;--mu:#97a1b3;--bd:#2b3340;--ac:#6ea8ff;--soft:#1d2a40;--ok:#4cc79a;--er:#ff8a7a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11151c;--card:#1a202a;--tx:#e8ecf3;--mu:#97a1b3;--bd:#2b3340;--ac:#6ea8ff;--soft:#1d2a40;--ok:#4cc79a;--er:#ff8a7a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:22px;margin:0}h2{font-size:16px;margin:0 0 12px}.sub{color:var(--mu);margin:2px 0 18px}
+.tabs{display:flex;gap:6px;margin-bottom:16px}
+.tabs button{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 16px;border-radius:8px;cursor:pointer;font:inherit}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:18px;margin-bottom:16px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label{display:block;font-size:12px;color:var(--mu);margin-bottom:4px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+.btn{background:var(--ac);color:#fff;border:0;padding:9px 16px;border-radius:8px;cursor:pointer;font:inherit;margin:14px 6px 0 0}.btn.s{background:var(--mu)}
+.btn:disabled{opacity:.5;cursor:default}
+.msg{margin-top:10px;font-size:14px}.ok{color:var(--ok)}.er{color:var(--er)}.mu{color:var(--mu)}
+.hint{background:var(--soft);border-radius:8px;padding:10px 12px;margin-top:12px;font-size:14px}
+.sc{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--bd);white-space:nowrap}
+th{color:var(--mu);font-weight:600;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat b{display:block;font-size:24px}.stat span{color:var(--mu);font-size:12px}
+.pill{background:var(--soft);color:var(--ac);padding:2px 8px;border-radius:99px;font-size:12px}
+.bar{height:6px;background:var(--bd);border-radius:9px;overflow:hidden;min-width:80px}.bar i{display:block;height:100%;background:var(--ok)}
+.dr{margin-top:12px;padding:12px;border:1px solid var(--bd);border-radius:8px}
+.th{height:44px;border-radius:6px;border:1px solid var(--bd);cursor:pointer;vertical-align:middle;margin:2px}
+.fb{background:var(--soft);color:var(--ac);border:0;border-radius:6px;padding:5px 9px;cursor:pointer;font:inherit;margin:2px}
+.fb.r{color:var(--er)}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:50;padding:env(safe-area-inset-top,0px) 12px env(safe-area-inset-bottom,0px)}
+#ov[hidden]{display:none}#ovb{display:flex;flex-direction:column;align-items:center;gap:10px}
+#ovb img{max-width:94vw;max-height:80vh;border-radius:6px}#ovb iframe{width:92vw;height:78vh;border:0;background:#fff;border-radius:6px}
+#ovx{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);right:16px;background:#fff;color:#111;border:0;border-radius:99px;width:36px;height:36px;font-size:18px;cursor:pointer}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.fo{text-align:left;background:var(--bg);border:1px solid var(--bd);border-radius:12px;padding:14px;cursor:pointer;color:var(--tx);font:inherit;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
+.fo:hover{border-color:var(--ac)}.fo .bar{width:100%}.ic{font-size:26px}
+#dg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:60;padding:12px}
+#dg[hidden]{display:none}.dgc{background:var(--card);color:var(--tx);border-radius:12px;padding:18px;max-width:420px;width:100%}.dgc p{margin:0 0 12px}
+:root{--ink:#0e1a33;--tx:#0e1a33;--mu:#5b6b88;--blue:#037ef3;--ac:#037ef3;--blue2:#5aaeff;--red:#e5484d;--bg:#edf2f9;--card:#fff;--bd:#d6deeb;--soft:rgba(3,126,243,.1);--sh:rgba(3,126,243,.16);--dot:rgba(14,26,51,.08);--ok:#0b8f5b;--er:#d1383d;--dsp:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif}
+@media(prefers-color-scheme:dark){:root:not([data-theme='light']){--ink:#eaf0ff;--tx:#eaf0ff;--mu:#9aabcc;--blue:#3b95ff;--ac:#3b95ff;--blue2:#7bbaff;--bg:#0a1224;--card:#121c36;--bd:#27375f;--soft:rgba(59,149,255,.14);--sh:rgba(0,0,0,.4);--dot:rgba(255,255,255,.05);--ok:#4fd49a;--er:#ff8a8f}}
+:root[data-theme='dark']{--ink:#eaf0ff;--tx:#eaf0ff;--mu:#9aabcc;--blue:#3b95ff;--ac:#3b95ff;--blue2:#7bbaff;--bg:#0a1224;--card:#121c36;--bd:#27375f;--soft:rgba(59,149,255,.14);--sh:rgba(0,0,0,.4);--dot:rgba(255,255,255,.05);--ok:#4fd49a;--er:#ff8a8f}
+body{font-family:'Hanken Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--tx);background:radial-gradient(1100px 480px at 90% -8%,rgba(3,126,243,.18),transparent 62%),radial-gradient(var(--dot) 1px,transparent 1.3px) 0 0/22px 22px,var(--bg)}
+.air{height:10px;background:repeating-linear-gradient(-45deg,var(--red) 0 14px,#fff 14px 20px,var(--blue) 20px 34px,#fff 34px 40px)}
+.hero{padding:6px 0 22px}.hero h1{font:800 clamp(38px,8vw,68px)/.95 var(--dsp);letter-spacing:-.035em;margin:10px 0 10px}
+.hero .sub{font-size:16px;max-width:46ch;margin:0 0 6px}
+.route{display:block;width:100%;max-width:660px;height:auto;overflow:visible}
+.route .p{fill:none;stroke:var(--blue);stroke-width:2.2;stroke-dasharray:2 8;stroke-linecap:round}
+.route circle{fill:var(--card);stroke:var(--blue);stroke-width:3}
+.route text{font:700 12.5px var(--dsp);fill:var(--tx);text-anchor:middle}.route .pl{fill:var(--red)}
+h2{font:800 18px/1.2 var(--dsp);letter-spacing:-.01em}
+.tabs{display:inline-flex;background:var(--card);border:1.5px solid var(--bd);border-radius:99px;padding:4px;gap:2px;margin-bottom:20px}
+.tabs button{border:0;border-radius:99px;background:transparent;color:var(--mu);font:700 14px var(--dsp);padding:9px 20px}
+.tabs button.on{background:var(--tx);color:var(--card)}
+.card{border:1.5px solid var(--bd);border-radius:18px;box-shadow:6px 6px 0 var(--sh);padding:22px}
+.stat b{font:800 36px/1 var(--dsp);letter-spacing:-.03em;color:var(--blue)}
+.btn{background:var(--blue);color:#fff;border-radius:99px;font:700 14px var(--dsp);padding:10px 20px;box-shadow:0 3px 0 rgba(0,0,0,.28);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+.btn.s{background:transparent;color:var(--tx);border:1.5px solid var(--bd);box-shadow:none}
+input,select{border:1.5px solid var(--bd);border-radius:12px;padding:11px 12px;background:var(--card)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--blue2);outline-offset:2px}
+.dr{border:1.5px dashed var(--bd);border-radius:14px}
+.hint{background:transparent;border:1.5px dashed var(--blue)}
+th{font:700 12px var(--dsp)}tbody tr:hover td,tr:hover>td{background:var(--soft)}
+.pill{border-radius:6px;font:700 12px var(--dsp);background:var(--soft);color:var(--blue)}
+.bar{height:10px;border-radius:99px;border:1.5px solid var(--bd);background:var(--card)}
+.bar i{background:repeating-linear-gradient(-45deg,var(--blue) 0 6px,var(--blue2) 6px 12px)}
+td .ok,td .er,td .mu{display:inline-block;font:800 11.5px/1 var(--dsp);letter-spacing:.05em;text-transform:uppercase;border:2px solid currentColor;border-radius:6px;padding:4px 7px}
+td .ok{transform:rotate(-3deg)}td .er{transform:rotate(2deg)}td .mu{border-style:dashed;opacity:.85}
+td br+.er{all:unset;color:var(--er);font-size:12px;white-space:normal}
+.th{border:3px solid #fff;border-radius:4px;box-shadow:0 1px 5px rgba(0,0,0,.3);transform:rotate(-2deg);height:48px}.th:nth-of-type(even){transform:rotate(2deg)}
+.fb{border-radius:99px;font:700 12px var(--dsp)}
+.fo{position:relative;border:1.5px solid var(--bd);border-radius:14px;background:var(--card);padding:16px 16px 14px;gap:5px;box-shadow:5px 5px 0 var(--sh);background-image:linear-gradient(90deg,var(--bd) 50%,transparent 0);background-size:9px 1.5px;background-repeat:repeat-x;background-position:0 calc(100% - 66px)}
+.fo::before,.fo::after{content:'';position:absolute;bottom:58px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:1.5px solid var(--bd)}
+.fo::before{left:-9px;clip-path:inset(0 0 0 50%)}.fo::after{right:-9px;clip-path:inset(0 50% 0 0)}
+.fo:hover{border-color:var(--blue)}.fo .ic{display:none}.fo .bar{margin-top:8px}
+.fo .pill{order:-2;background:none;padding:0;font:800 38px/1 var(--dsp);letter-spacing:-.03em;color:var(--blue)}.fo b{order:-1;font:700 16px var(--dsp)}
+.dgc{border:1.5px solid var(--bd);box-shadow:8px 8px 0 var(--sh)}#dg{backdrop-filter:blur(3px)}
+.pod{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:6px 0 20px}
+.pd{flex:1;max-width:180px;border:1.5px solid var(--bd);border-radius:14px 14px 0 0;background:var(--card);text-align:center;padding:12px 8px;display:flex;flex-direction:column;gap:3px}
+.pd b{font:800 34px/1 var(--dsp);letter-spacing:-.03em;color:var(--blue)}.pd span{font-weight:700;overflow-wrap:anywhere}.pd i{font:800 13px var(--dsp);font-style:normal;color:var(--mu)}
+.p1{min-height:150px;border-top:5px solid var(--blue)}.p2{min-height:122px}.p3{min-height:98px}
+#dgm{white-space:pre-wrap;max-height:50vh;overflow:auto}
+.sb{display:flex;height:12px;border-radius:99px;overflow:hidden;background:var(--bd);min-width:120px}.sb .a{background:var(--ok)}.sb .p{background:var(--blue)}
+.wk{display:flex;align-items:flex-end;gap:8px;height:170px}.wk div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px}
+.wk i{width:100%;max-width:46px;background:var(--blue);border-radius:6px 6px 0 0}.wk span{font-size:11px;color:var(--mu)}.wk b{font:800 13px var(--dsp)}
+.lg{list-style:none;margin:0;padding:0}.lg li{display:flex;gap:14px;padding:9px 0;border-bottom:1px solid var(--bd)}.lg li>span{min-width:150px;font-size:13px}
+#lg{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:16px}#lg[hidden]{display:none}
+.lgc{max-width:400px;width:100%;background:var(--card);border:1.5px solid var(--bd);border-radius:18px;box-shadow:8px 8px 0 var(--sh);padding:26px}.lgc h2{font-size:22px}
+#ld{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--mu);font:700 15px var(--dsp)}#ld[hidden]{display:none}
+textarea{width:100%;border:1.5px solid var(--bd);border-radius:12px;padding:11px 12px;background:var(--card);color:var(--tx);font:inherit;margin-top:6px}
+</style></head><body>
+<div id="ld">Loading…</div>
+<div id="lg" hidden><div class="lgc"><h2 id="lgh">Governance Submissions</h2><p class="mu" id="lgt"></p>
+<div id="fe1"><label>AIESEC email</label><input id="le" type="email" autocomplete="username"></div>
+<div id="fp1" style="margin-top:10px"><label id="lpl">Password</label><input id="lp" type="password" autocomplete="current-password"></div>
+<div id="fq1" hidden style="margin-top:10px"><label>Confirm password</label><input id="lq" type="password" autocomplete="new-password"></div>
+<button class="btn" id="lgo">Sign in</button><button class="btn s" id="lsw">Create account</button><button class="btn s" id="lfg">Forgot password</button>
+<div class="msg er" id="lm"></div></div></div>
+<div class="w" id="app" hidden>
+<div class="tabs"><button id="t1" class="on">Submit</button><button id="t3">Points</button><button id="t2" hidden>Admin dashboard</button><button id="so">Sign out</button></div>
+<div id="v1">
+<div class="card"><h2>New submission</h2>
+<div class="g">
+<div><label>Your name</label><input id="mn" placeholder="Full name"></div>
+<div><label>Your function</label><select id="fn"></select></div>
+<div><label>EP (start typing to search)</label><input id="ep" list="epl" placeholder="Search EP name" autocomplete="off"><datalist id="epl"></datalist></div>
+<div><label>Stage</label><select id="st"></select></div>
+</div>
+<div class="hint" id="hint"></div><div id="docs"></div>
+<button class="btn" id="go">Submit documents</button><div class="msg" id="msg"></div></div>
+<div class="card"><h2>My submissions <span class="pill" id="mypts"></span></h2><div class="sc" id="mine"></div></div>
+<input id="rp" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,application/pdf" hidden>
+</div>
+<div id="v3" hidden><div class="card"><h2>Points per member</h2><div id="pod"></div><div class="sc" id="pts"></div></div></div>
+<div id="v2" hidden>
+<div class="tabs" id="sub"><button data-sub="ov" class="on">Overview</button><button data-sub="in">Insights</button><button data-sub="ac">Activity</button></div>
+<div id="fv" hidden></div>
+<div id="ins" hidden></div><div id="act" hidden></div>
+<div id="dash">
+<div class="card"><h2>Filters</h2><div class="g">
+<div><label>EP</label><input id="fe" placeholder="Search EP"></div>
+<div><label>Member</label><input id="fm" placeholder="Search member"></div>
+<div><label>Function</label><select id="ff"></select></div>
+<div><label>Stage</label><select id="fs"></select></div>
+<div><label>Document</label><select id="fd"></select></div>
+<div><label>Status</label><select id="fq"><option value="">All statuses</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></div>
+<div><label>From</label><input id="f1" type="date"></div>
+<div><label>To</label><input id="f2" type="date"></div>
+</div><button class="btn s" id="rs">Reset filters</button><button class="btn" id="csv">Export CSV</button><span class="msg mu" id="cm"></span></div>
+<div class="stats" id="stats"></div>
+<div class="card"><h2>EP folders</h2><div class="fg" id="eps"></div></div>
+<div class="card"><h2>Follow-up: what’s next for each EP</h2><div class="sc" id="fu"></div></div>
+<div class="card"><h2>Points leaderboard</h2><div class="sc" id="lb"></div></div>
+<div class="card"><h2>Submissions</h2><div class="sc" id="tb"></div></div>
+<div class="card"><h2>Access list</h2><p class="mu">One email per line: <b>email, name, admin</b> (name and “admin” are optional). Only these emails can create an account. Removing a line removes that person’s access.</p><textarea id="al" rows="7" placeholder="name@aiesec.net, Full Name"></textarea><button class="btn" id="als">Save list</button><span class="msg mu" id="alm"></span></div>
+</div></div>
+</div>
+<div id="ov" hidden><button id="ovx" aria-label="Close">✕</button><div id="ovb"></div></div>
+<div id="dg" hidden><div class="dgc"><p id="dgm"></p><input id="dgi"><div><button class="btn s" id="dgn">Cancel</button><button class="btn" id="dgy">OK</button></div></div></div>
+
+<script>
+const SB_URL="https://tuhhijeqdvqouenhcnsj.supabase.co",SB_KEY="sb_publishable_5GMUagQf5va7hf7ovxIB8Q_e3-8XdMm";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const AP=["Contract (Last 4 Pages)","Acceptance Note","University Professor","National ID","Expectation Email (PDF)"];
+const RE=["Passport","Entry Stamp","Flight Ticket","Health Insurance","OPS Invitation","Communication 10 Days Before Arrival","Communication Within 24 Hours After Arrival"];
+const FI=["Mid-Duration Communication","Last-Week Communication","Exit Stamp","Completed Survey"];
+const IA=["Passport or ID","Expectation Email","Email Thread","OP Email"];
+const IR=["Passport","Entry Stamp","Health Insurance","Flight Ticket","Communication 10 Days Before Arrival","Communication Within 24 Hours After Arrival","IPS Invitations","Alignment Spaces (3)","Accommodation Location"];
+const O={APD:AP,REA:RE,Finished:FI,"Post-Approval":["PGS","LDA"]};
+const D={OGV:O,OGT:O,
+IGV:{APD:IA,REA:IR,Finished:["Mid-Duration Communication","Last-Week Communication","GD Form (Alignment Spaces)","Exit Stamp","Completed Survey"],"Post-Approval":["LDA"]},
+IGT:{APD:IA,REA:IR,Finished:["Mid-Duration Alignment Space","End-Duration Alignment Space","Exit Stamp","Completed Survey","Monthly Communications","Salary and Benefits Proofs","Communication Proof"],"Post-Approval":["LDA"]}};
+const PTS=5,STG=["APD","REA","Finished","Post-Approval"],FN=Object.keys(D),DAY=864e5,APD_DAYS=7;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const opts=(a,all)=>(all?'<option value="">'+all+'</option>':'')+a.map(x=>'<option>'+esc(x)+'</option>').join("");
+const epk=s=>(s||"").trim().toLowerCase(),clean=s=>String(s).replace(/[\\/:*?"<>|]+/g,"_").slice(0,80);
+const fmt=t=>{try{return new Date(t).toLocaleString([],{dateStyle:"medium",timeStyle:"short"})}catch(e){return t}};
+const fd=t=>new Date(t).toLocaleDateString([],{dateStyle:"medium"}),pc=(a,b)=>b?Math.round(a/b*100):0;
+const rid=()=>Math.random().toString(36).slice(2,8);
+function table(h,rows){return rows.length?'<table><tr>'+h.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join("")+'</tr>').join("")+'</table>':'<p class="mu">Nothing here yet.</p>'}
+let me=null,admin=false,myName="",eps=[],subs=[],revm={},audit=[],board=[],urlOf={},cur=null,sub="ov",fixId=null,mode="in",booting=false,recovering=false;
+
+/* ---------- dialog ---------- */
+function ask(msg,def,m){return new Promise(res=>{const g=$("#dg"),i=$("#dgi"),tx=m==="input"||m==="pass";$("#dgm").textContent=msg;i.hidden=!tx;i.type=m==="pass"?"password":"text";i.value=def||"";$("#dgn").hidden=m==="info";g.hidden=false;if(tx)i.focus();
+  const end=v=>{g.hidden=true;$("#dgy").onclick=$("#dgn").onclick=null;res(v)};
+  $("#dgy").onclick=()=>end(tx?i.value:true);$("#dgn").onclick=()=>end(tx?null:false)})}
+$("#dgi").addEventListener("keydown",e=>{if(e.key==="Enter")$("#dgy").click();if(e.key==="Escape")$("#dgn").click()});
+
+/* ---------- auth screen ---------- */
+function authUI(){
+  const T={in:["Sign in with your AIESEC email.","Sign in"],up:["Create your account with your AIESEC email. We’ll send a confirmation link.","Create account"],fg:["Enter your email and we’ll send you a reset link.","Send reset link"],rc:["Choose a new password.","Save new password"]}[mode];
+  $("#lgt").textContent=T[0];$("#lgo").textContent=T[1];
+  $("#fe1").hidden=mode==="rc";$("#fp1").hidden=mode==="fg";$("#fq1").hidden=!(mode==="up"||mode==="rc");
+  $("#lpl").textContent=mode==="rc"?"New password":"Password";$("#lp").autocomplete=mode==="in"?"current-password":"new-password";
+  $("#lsw").textContent=mode==="in"?"Create account":mode==="up"?"I already have an account":"Back to sign in";$("#lsw").hidden=mode==="rc";
+  $("#lfg").hidden=mode!=="in";$("#lm").textContent="";$("#lm").className="msg er";
+}
+function showAuth(m){mode=m||"in";$("#ld").hidden=true;$("#app").hidden=true;$("#lg").hidden=false;authUI()}
+$("#lsw").onclick=()=>{mode=mode==="in"?"up":"in";authUI()};
+$("#lfg").onclick=()=>{mode="fg";authUI()};
+["le","lp","lq"].forEach(i=>$("#"+i).addEventListener("keydown",e=>{if(e.key==="Enter")$("#lgo").click()}));
+function lmsg(t,ok){const m=$("#lm");m.textContent=t;m.className="msg "+(ok?"ok":"er")}
+$("#lgo").onclick=async()=>{
+  const em=$("#le").value.trim().toLowerCase(),pw=$("#lp").value,b=$("#lgo");b.disabled=true;lmsg("");
+  try{
+    if(mode==="rc"){if(pw.length<8)return lmsg("Use at least 8 characters.");if(pw!==$("#lq").value)return lmsg("Passwords don’t match.");
+      const{error}=await sb.auth.updateUser({password:pw});if(error)return lmsg(error.message);history.replaceState(null,"",location.pathname);recovering=false;$("#lp").value=$("#lq").value="";const{data}=await sb.auth.getSession();await boot(data.session,true);return}
+    if(!/^\S+@\S+\.\S+$/.test(em))return lmsg("Enter a valid email.");
+    const back=location.origin+location.pathname;
+    if(mode==="fg"){const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:back});return error?lmsg(error.message):lmsg("If this email has an account, a reset link is on its way.",true)}
+    if(mode==="up"){if(pw.length<8)return lmsg("Use at least 8 characters.");if(pw!==$("#lq").value)return lmsg("Passwords don’t match.");
+      const{data,error}=await sb.auth.signUp({email:em,password:pw,options:{emailRedirectTo:back}});
+      if(error)return lmsg(/database error|not allowed/i.test(error.message)?"This email isn’t on the access list. Ask the admin to add it.":error.message);
+      if(data.session)return;return lmsg("Check your email and click the confirmation link, then sign in.",true)}
+    const{error}=await sb.auth.signInWithPassword({email:em,password:pw});
+    if(error)return lmsg(/confirm/i.test(error.message)?"Please confirm your email first (check your inbox).":"Wrong email or password.");
+  }catch(e){lmsg("Something went wrong, please try again.")}finally{b.disabled=false}
+};
+$("#so").onclick=async()=>{await sb.auth.signOut();me=null;admin=false;subs=[];showAuth("in")};
+sb.auth.onAuthStateChange((ev,s)=>{if(ev==="PASSWORD_RECOVERY"){recovering=true;showAuth("rc");return}if(ev==="SIGNED_OUT"){me=null;showAuth("in");return}if(s&&!recovering)setTimeout(()=>boot(s),0)});
+sb.auth.getSession().then(({data})=>{if(!data.session&&!me)showAuth("in")});
+
+async function boot(s,force){
+  if(!s||booting||(me&&me.id===s.user.id&&!force))return;booting=true;
+  try{
+    const{data}=await sb.rpc("my_info"),row=data&&data[0];
+    if(!row){$("#ld").hidden=true;$("#app").hidden=true;$("#lg").hidden=false;mode="in";authUI();lmsg("This account isn’t on the access list anymore. Ask the admin.");await sb.auth.signOut();me=null;return}
+    me=s.user;admin=row.role==="admin";myName=row.name||"";
+    if(!$("#mn").value)$("#mn").value=myName;
+    $("#t2").hidden=!admin;$("#lg").hidden=true;$("#ld").hidden=true;$("#app").hidden=false;
+    await refresh();
+  }finally{booting=false}
+}
+
+/* ---------- data ---------- */
+async function refresh(){
+  if(!me)return;
+  const[e,s,r,b]=await Promise.all([sb.from("eps").select("*").order("name"),sb.from("submissions").select("*").order("ts",{ascending:false}),sb.from("reviews").select("*"),sb.rpc("get_points_board")]);
+  eps=(e.data||[]).map(x=>({name:x.name,fn:x.fn,ap:x.ap,ss:x.ss,se:x.se}));
+  revm={};(r.data||[]).forEach(x=>revm[x.submission_id]=x);
+  subs=(s.data||[]).map(x=>({...x,uid:x.user_id}));board=b.data||[];
+  if(admin){const a=await sb.from("audit").select("*").order("at");audit=a.data||[]}
+  build();await sign();fillEps();renderAll();
+}
+function build(){
+  subs.forEach(s=>{const r=revm[s.id],stale=r&&s.upd&&s.upd>r.at;s.status=(!r||stale)?"pending":r.status;s.note=(r&&!stale&&r.status==="rejected")?(r.note||""):"";s.pts=0});
+  const B={};subs.forEach(s=>(B[s.bid]=B[s.bid]||[]).push(s));const seen=new Set();
+  Object.values(B).sort((a,b)=>a[0].ts.localeCompare(b[0].ts)).forEach(g=>{const f=g.slice().sort((a,b)=>a.n-b.n)[0],k=f.fn+"|"+f.stage+"|"+epk(f.ep);
+    if(!seen.has(k)&&g.every(x=>x.status==="approved")){seen.add(k);f.pts=PTS}});
+}
+async function sign(){
+  const ps=[...new Set(subs.flatMap(s=>(s.files||[]).map(f=>f.path)))];urlOf={};
+  for(let i=0;i<ps.length;i+=200){const{data}=await sb.storage.from("docs").createSignedUrls(ps.slice(i,i+200),3600);(data||[]).forEach(x=>{if(x.signedUrl)urlOf[x.path]=x.signedUrl})}
+}
+async function logA(s,act,note){try{await sb.from("audit").insert({act,ep:s.ep,fn:s.fn,item:s.item||"",member:s.member,note:note||"",submission_id:s.id})}catch(e){}}
+async function review(ids,k){let note="";
+  if(k==="r"){note=await ask("Reason for rejection (the member will see it):","","input");if(note===null)return}
+  const at=new Date().toISOString();
+  for(const id of ids){await sb.from("reviews").upsert({submission_id:id,status:k==="a"?"approved":"rejected",note:note||"",at});const s=subs.find(x=>x.id===id);if(s)await logA(s,k==="a"?"approved":"rejected",note)}
+  await refresh()}
+async function patch(list,fields){const{error}=await sb.from("submissions").update(fields).in("id",list.map(s=>s.id));if(error)throw error;await refresh()}
+
+/* ---------- member side ---------- */
+$("#fn").innerHTML=opts(FN);$("#st").innerHTML=opts(STG);
+const allDocs=[...new Set(FN.flatMap(f=>STG.flatMap(s=>D[f][s])))].sort();
+$("#ff").innerHTML=opts(FN,"All functions");$("#fs").innerHTML=opts(STG,"All stages");$("#fd").innerHTML=opts(allDocs,"All documents");
+function fillDocs(){const L=D[$("#fn").value][$("#st").value];$("#hint").textContent="All "+L.length+" documents of this stage are required and submitted together · "+PTS+" points for the whole submission, after approval · several images or a PDF per document, up to 20 MB per file.";$("#docs").innerHTML=L.map((x,i)=>'<div class="dr"><label>'+(i+1)+'. '+esc(x)+'</label><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"></div>').join("")}
+$("#fn").onchange=$("#st").onchange=fillDocs;fillDocs();
+function fillEps(){$("#epl").innerHTML=eps.map(e=>'<option value="'+esc(e.name)+'" label="'+e.fn+'"></option>').join("");onEp()}
+function onEp(){const e=eps.find(x=>epk(x.name)===epk($("#ep").value));if(e){if($("#fn").value!==e.fn){$("#fn").value=e.fn;fillDocs()}$("#fn").disabled=true}else $("#fn").disabled=false}
+$("#ep").oninput=$("#ep").onchange=onEp;
+function say(t,ok){const m=$("#msg");m.className="msg "+(ok?"ok":"er");m.textContent=t}
+$("#go").onclick=async()=>{
+  const f={member:$("#mn").value.trim(),fn:$("#fn").value,ep:$("#ep").value.trim(),stage:$("#st").value};
+  if(eps.length){const h=eps.find(x=>epk(x.name)===epk(f.ep));if(!h)return say("Please pick the EP from the list (start typing the name).");
+    if($("#fn").value!==h.fn){$("#fn").value=h.fn;fillDocs();return say("Function set to "+h.fn+" for this EP. Please attach the files again.")}f.ep=h.name}
+  const L=D[f.fn][f.stage],ins=[...document.querySelectorAll("#docs input")];
+  if(!f.member||!f.ep)return say("Please enter your name and pick the EP.");
+  for(let i=0;i<L.length;i++){const fs=[...ins[i].files];
+    if(!fs.length)return say("Missing: “"+L[i]+"”. All documents in this stage are required.");
+    for(const file of fs){if(!/^image\/(jpeg|png|webp|gif)$|^application\/pdf$/.test(file.type))return say("“"+L[i]+"”: only JPEG, PNG, WebP, GIF or PDF files are allowed.");
+      if(file.size>20*1024*1024)return say("“"+L[i]+"”: a file is larger than 20 MB.")}}
+  const b=$("#go");b.disabled=true;
+  try{
+    const bid=crypto.randomUUID(),rows=[];
+    for(let i=0;i<L.length;i++){say("Uploading "+(i+1)+" of "+L.length+"…",true);const files=[];
+      for(const file of ins[i].files){const path=me.id+"/"+rid()+rid()+"-"+clean(file.name),{error}=await sb.storage.from("docs").upload(path,file,{contentType:file.type});if(error)throw error;files.push({name:file.name,path})}
+      rows.push({bid,n:i,member:f.member,fn:f.fn,ep:f.ep,stage:f.stage,item:L[i],files})}
+    const{error}=await sb.from("submissions").insert(rows);if(error)throw error;
+    ins.forEach(x=>x.value="");say("Submitted! You’ll get "+PTS+" points once the admin approves all "+L.length+" documents.",true);await refresh();
+  }catch(e){say("Something went wrong: "+((e&&e.message)||"please try again."))}
+  b.disabled=false;
+};
+$("#rp").onchange=async e=>{const fs=[...e.target.files];if(!fs.length||!fixId)return;
+  try{const files=[];for(const file of fs){const path=(subs.find(x=>x.id===fixId)||{}).user_id+"/"+rid()+rid()+"-"+clean(file.name),{error}=await sb.storage.from("docs").upload(path,file,{contentType:file.type});if(error)throw error;files.push({name:file.name,path})}
+    const s=subs.find(x=>x.id===fixId);await patch([s],{files,upd:new Date().toISOString()})}catch(x){await ask("Couldn’t replace the files: "+((x&&x.message)||"try again."),"","info")}
+  e.target.value="";fixId=null};
+const stat=s=>s.status==="approved"?'<span class="ok">✓ Approved</span>':s.status==="rejected"?'<span class="er">✕ Rejected</span>':'<span class="mu">⏳ Pending</span>';
+const link=s=>(s.files||[]).map((x,i)=>{const n=esc(x.name||"File "+(i+1)),u=urlOf[x.path];if(!u)return n;
+  return /\.pdf$/i.test(x.name||"")?'<button class="fb" data-v="'+esc(u)+'" data-n="'+n+'" data-p="1">📄 '+n+'</button>':'<img class="th" src="'+esc(u)+'" alt="'+n+'" title="'+n+'" data-v="'+esc(u)+'" data-n="'+n+'">'}).join(" ");
+function renderMine(){
+  const m=subs.filter(s=>me&&s.uid===me.id),b=board.find(x=>x.member_key===epk(myName)||m.some(s=>epk(s.member)===x.member_key));
+  $("#mypts").textContent=(b?b.points:0)+" pts";
+  $("#mine").innerHTML=table(["Date","EP","Function","Stage","Document","Status","Files",""],m.map(s=>[esc(fmt(s.ts)),esc(s.ep),esc(s.fn),esc(s.stage),esc(s.item),stat(s)+(s.note?'<br><span class="er">Reason: '+esc(s.note)+'</span>':""),link(s),s.status==="rejected"?'<button class="fb" data-fix="'+esc(s.id)+'">Replace files</button>':""]));
+}
+function renderPts(){
+  const L=board,top=L.slice(0,3),ord=[1,0,2].filter(i=>top[i]);
+  $("#pod").innerHTML=top.length?'<div class="pod">'+ord.map(i=>'<div class="pd p'+(i+1)+'"><b>'+top[i].points+'</b><span>'+esc(top[i].member)+'</span><i>'+(i+1)+'</i></div>').join("")+'</div>':"";
+  $("#pts").innerHTML=table(["#","Member","Approved submissions","Points"],L.map((o,i)=>[i+1,esc(o.member)+(o.member_key===epk(myName)?' <span class="pill">You</span>':""),o.submissions,"<b>"+o.points+"</b>"]));
+}
+
+/* ---------- admin ---------- */
+const FL=["fe","fm","ff","fs","fd","fq","f1","f2"];
+function filtered(){const v=i=>$("#"+i).value.trim().toLowerCase(),e=v("fe"),m=v("fm"),f=$("#ff").value,s=$("#fs").value,d=$("#fd").value,q=$("#fq").value,a=$("#f1").value,b=$("#f2").value;
+  return subs.filter(x=>(!e||epk(x.ep).includes(e))&&(!m||epk(x.member).includes(m))&&(!f||x.fn===f)&&(!s||x.stage===s)&&(!d||x.item===d)&&(!q||x.status===q)&&(!a||x.ts.slice(0,10)>=a)&&(!b||x.ts.slice(0,10)<=b));}
+const epS=e=>subs.filter(x=>x.fn===e.fn&&epk(x.ep)===epk(e.name));
+const stOf=(e,s)=>{const m=epS(e).filter(x=>x.stage===s);return!m.length?0:m.every(x=>x.status==="approved")?2:1};
+const dueOf=(e,s)=>{const d=s==="APD"?e.ap:s==="REA"?e.ss:s==="Finished"?e.se:"";if(!d)return null;const t=new Date(d+"T00:00:00").getTime();return s==="APD"?t+APD_DAYS*DAY:t};
+function gaps(){const out=[];eps.forEach(e=>{const s=["APD","REA","Finished"].find(x=>stOf(e,x)===0);if(!s)return;const d=dueOf(e,s),od=d&&d<Date.now()?Math.floor((Date.now()-d)/DAY):0;out.push({e,s,d,od})});return out.sort((a,b)=>b.od-a.od||(a.d||9e15)-(b.d||9e15))}
+function metrics(){
+  const base=eps.length?eps:[...new Map(subs.map(x=>[x.fn+"|"+epk(x.ep),{name:x.ep,fn:x.fn}])).values()];
+  const stages=STG.map(s=>{let a=0,p=0;base.forEach(e=>{const v=stOf(e,s);if(v===2)a++;else if(v===1)p++});return{s,a,p,n:base.length-a-p}});
+  const A=audit.filter(x=>x.act==="approved"||x.act==="rejected"),rj=A.filter(x=>x.act==="rejected"),rejNow=subs.filter(x=>x.status==="rejected"),done=subs.filter(x=>x.status!=="pending");
+  const rate=A.length?Math.round(rj.length/A.length*100):(done.length?Math.round(rejNow.length/done.length*100):0);
+  const tsm={},first={};subs.forEach(x=>tsm[x.id]=x.ts);A.forEach(x=>{if(!first[x.submission_id])first[x.submission_id]=x});
+  const ds=Object.values(first).map(x=>tsm[x.submission_id]?new Date(x.at)-new Date(tsm[x.submission_id]):-1).filter(x=>x>=0);
+  const avgH=ds.length?ds.reduce((a,b)=>a+b,0)/ds.length/36e5:null;
+  const tr={};(rj.length?rj:rejNow).forEach(x=>tr[x.item]=(tr[x.item]||0)+1);
+  const topRej=Object.entries(tr).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const weeks=[];for(let i=7;i>=0;i--){const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7)-i*7);weeks.push({t:d.getTime(),n:0})}
+  const sb2=new Set();subs.forEach(x=>{if(sb2.has(x.bid))return;sb2.add(x.bid);const t=new Date(x.ts).getTime();for(let i=weeks.length-1;i>=0;i--)if(t>=weeks[i].t){weeks[i].n++;break}});
+  const G=gaps();
+  return{N:base.length,started:base.filter(e=>epS(e).length).length,stages,rate,avgH,topRej,weeks,G,over:G.filter(g=>g.od>0).length}
+}
+const kpis=m=>[[m.N,"EPs in the sheet"],[m.started,"EPs with documents"],[pc(m.stages[0].a,m.N)+"%","APD approved"],[m.over,"Overdue EPs"],[m.rate+"%","Rejection rate"],[m.avgH==null?"–":(m.avgH<48?Math.round(m.avgH)+" h":Math.round(m.avgH/24)+" d"),"Avg. review time"]];
+const rvb=s=>'<button class="fb" data-rv="a" data-id="'+esc(s.id)+'" title="Approve">✓</button><button class="fb r" data-rv="r" data-id="'+esc(s.id)+'" title="Reject">✕</button>'+(s.status==="rejected"?'<button class="fb" data-fix="'+esc(s.id)+'">Replace files</button>':"");
+function renderAll(){renderMine();renderPts();if(admin){renderAdmin();loadAllowed()}}
+function showAdmin(){$("#dash").hidden=!!cur||sub!=="ov";$("#ins").hidden=!!cur||sub!=="in";$("#act").hidden=!!cur||sub!=="ac";$("#sub").hidden=!!cur;$("#fv").hidden=!cur;
+  document.querySelectorAll("#sub button").forEach(b=>b.classList.toggle("on",b.dataset.sub===sub));renderAdmin()}
+function renderAdmin(){
+  if(!admin)return;if(cur){renderFolder();return}
+  if(sub==="in"){renderIns();return}if(sub==="ac"){renderAct();return}
+  const r=filtered(),E=new Map();r.forEach(x=>{const k=epk(x.ep)+"|"+x.fn;if(!E.has(k))E.set(k,{ep:x.ep,fn:x.fn})});
+  $("#stats").innerHTML=[[r.length,"Submissions"],[E.size,"EPs"],[new Set(r.map(x=>epk(x.member))).size,"Members"],[r.reduce((a,x)=>a+x.pts,0),"Points awarded"],[r.filter(x=>x.status==="pending").length,"Pending review"]].map(x=>'<div class="card stat" style="margin:0"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("");
+  const P=[...E.values()].sort((a,b)=>a.ep.localeCompare(b.ep));
+  $("#eps").innerHTML=P.length?P.map(p=>{const m=epS({name:p.ep,fn:p.fn}),ps=STG.filter(s=>m.some(x=>x.stage===s)),done=new Set(m.map(x=>x.stage+"|"+x.item)).size,tot=ps.reduce((a,s)=>a+D[p.fn][s].length,0),pe=m.filter(x=>x.status==="pending").length;
+    return '<button class="fo" data-ep="'+esc(p.ep)+'" data-fn="'+p.fn+'"><span class="ic">📁</span><b>'+esc(p.ep)+'</b><span class="pill">'+p.fn+'</span><div class="bar"><i style="width:'+pc(done,tot)+'%"></i></div><span class="mu">'+esc(ps.join(" · "))+'</span><span class="mu">'+done+" / "+tot+" documents · "+m.reduce((a,x)=>a+x.pts,0)+" pts"+(pe?" · "+pe+" pending":"")+"</span></button>"}).join(""):'<p class="mu">Nothing here yet.</p>';
+  $("#fu").innerHTML=table(["EP","Function","Stages submitted","Next stage","Days since last","Pending","Rejected"],P.map(p=>{const m=epS({name:p.ep,fn:p.fn}),ss=new Set(m.map(x=>x.stage)),nx=STG.find(s=>!ss.has(s)),last=m.reduce((a,x)=>x.ts>a?x.ts:a,"");
+    return{d:Math.floor((Date.now()-new Date(last))/DAY),c:[esc(p.ep),p.fn,STG.filter(s=>ss.has(s)).join(" · "),nx?'<span class="er">'+nx+'</span>':'<span class="ok">All stages</span>',0,m.filter(x=>x.status==="pending").length,m.filter(x=>x.status==="rejected").length]}}).sort((a,b)=>b.d-a.d).map(o=>{o.c[4]=o.d;return o.c}));
+  const L=new Map();r.forEach(x=>{const k=epk(x.member),o=L.get(k)||{n:x.member,c:0,p:0};o.c++;o.p+=x.pts;L.set(k,o)});
+  $("#lb").innerHTML=table(["#","Member","Documents","Points"],[...L.values()].sort((a,b)=>b.p-a.p).map((o,i)=>[i+1,esc(o.n),o.c,"<b>"+o.p+"</b>"]));
+  $("#tb").innerHTML=table(["Date","EP","Member","Function","Stage","Document","Status","Pts","Files","Review",""],r.map(s=>[esc(fmt(s.ts)),esc(s.ep),esc(s.member),esc(s.fn),esc(s.stage),esc(s.item),stat(s)+(s.note?" · Reason: "+esc(s.note):""),s.pts,link(s),rvb(s),'<button class="fb r" data-del="'+esc(s.id)+'" title="Delete">🗑</button>']));
+}
+function renderFolder(){
+  const m=epS({name:cur.ep,fn:cur.fn}),ps=STG.filter(s=>m.some(x=>x.stage===s)),tot=ps.reduce((a,s)=>a+D[cur.fn][s].length,0),done=new Set(m.map(x=>x.stage+"|"+x.item)).size;
+  let h='<button class="btn s" data-act="bk" style="margin:0 6px 14px 0">← Back to all EPs</button><div class="card"><h2>📁 '+esc(cur.ep)+' <span class="pill">'+cur.fn+'</span></h2><div class="bar"><i style="width:'+pc(done,tot)+'%"></i></div><p class="mu">'+done+" of "+tot+" documents submitted in "+ps.join(" + ")+" · "+m.reduce((a,x)=>a+x.pts,0)+' points awarded</p><button class="btn" style="margin-top:0" data-act="apall">Approve all pending</button><button class="btn s" style="margin-top:0" data-act="ren">Rename / merge EP</button><button class="btn s" style="margin-top:0" data-act="fn">Change function</button><button class="btn s" style="margin-top:0" data-act="zip">Download all files (ZIP)</button><button class="btn s" style="margin-top:0" data-act="rem">Copy reminder</button><span class="msg mu" id="zm"></span></div>';
+  ps.forEach(s=>{h+='<div class="card"><h2>'+s+' <span class="pill">'+new Set(m.filter(x=>x.stage===s).map(x=>x.item)).size+" / "+D[cur.fn][s].length+'</span></h2>'+table(["Document","Status","Submitted by","Date","Files","Review"],D[cur.fn][s].map(it=>{const g=m.filter(x=>x.stage===s&&x.item===it),l=g[0];
+    return [esc(it),l?stat(l)+(l.note?" · Reason: "+esc(l.note):""):'<span class="er">Missing</span>',l?esc(l.member):"",l?esc(fmt(l.ts)):"",g.map(link).join(" "),l?rvb(l):""]}))+'</div>'});
+  $("#fv").innerHTML=h;
+}
+function save(name,blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+async function dlFile(src,name){const m=$("#dlm");try{const b=await(await fetch(src)).blob();save(name||"file",b);m.textContent=""}catch(e){m.textContent="Couldn’t download this file."}}
+async function act(a){const m=epS({name:cur.ep,fn:cur.fn}),zm=()=>$("#zm");
+  if(a==="bk"){cur=null;showAdmin();return}
+  else if(a==="apall"){await review(m.filter(x=>x.status==="pending").map(x=>x.id),"a")}
+  else if(a==="rem"){await copyText(reminder(cur.ep,cur.fn))}
+  else if(a==="ren"){const n=await ask("New EP name (use an existing EP’s name to merge the folders):",cur.ep,"input");if(n&&n.trim()){await logA(m[0],"renamed EP to "+n.trim());await patch(m,{ep:n.trim()});cur.ep=n.trim()}}
+  else if(a==="fn"){const n=((await ask("Change function to one of: "+FN.join(", "),cur.fn,"input"))||"").trim().toUpperCase();if(FN.includes(n)){await logA(m[0],"changed function to "+n);await patch(m,{fn:n});cur.fn=n}else if(n)await ask("Unknown function.","","info")}
+  else if(a==="zip"){if(!window.JSZip){zm().textContent="ZIP isn’t available right now.";return}
+    try{const z=new JSZip();let n=0;for(let i=0;i<m.length;i++){zm().textContent="Preparing "+(i+1)+" of "+m.length+"…";
+      for(const f of m[i].files||[]){try{const b=await(await fetch(urlOf[f.path])).blob();z.file(clean(m[i].stage)+"/"+clean(m[i].item)+"/"+(++n)+"_"+clean(f.name),b)}catch(e){}}}
+      save(clean(cur.ep)+".zip",await z.generateAsync({type:"blob"}));zm().textContent=""}catch(e){zm().textContent="Couldn’t create the ZIP."}}
+  renderAdmin();
+}
+function renderIns(){
+  const m=metrics(),mx=Math.max(1,...m.weeks.map(w=>w.n));
+  $("#ins").innerHTML='<button class="btn" style="margin:0 0 14px" data-rep="1">Download report</button><div class="stats">'+kpis(m).map(x=>'<div class="card stat" style="margin:0"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>').join("")+'</div>'
+  +'<div class="card"><h2>Compliance by stage</h2><div class="sc">'+table(["Stage","Progress","Approved","In review","Not started"],m.stages.map(s=>[s.s,'<div class="sb"><i class="a" style="width:'+pc(s.a,m.N)+'%"></i><i class="p" style="width:'+pc(s.p,m.N)+'%"></i></div>',s.a,s.p,s.n]))+'</div></div>'
+  +'<div class="card"><h2>Submissions per week</h2><div class="wk">'+m.weeks.map(w=>'<div><b>'+w.n+'</b><i style="height:'+Math.round(6+w.n/mx*90)+'px"></i><span>'+new Date(w.t).toLocaleDateString([],{month:"short",day:"numeric"})+'</span></div>').join("")+'</div></div>'
+  +'<div class="card"><h2>Most rejected documents</h2>'+table(["Document","Times rejected"],m.topRej.map(x=>[esc(x[0]),x[1]]))+'</div>'
+  +'<div class="card"><h2>Needs attention</h2><div class="sc">'+table(["EP","Function","Next stage","Due","Overdue",""],m.G.slice(0,30).map(g=>[esc(g.e.name),g.e.fn,g.s,g.d?fd(g.d):"–",g.od?'<span class="er">'+g.od+' d</span>':"–",'<button class="fb" data-rm="'+esc(g.e.name+"|"+g.e.fn)+'">Copy reminder</button>']))+'</div></div>';
+}
+function renderAct(){
+  const ev=[],bs=new Set();
+  subs.forEach(x=>{if(!bs.has(x.bid)){bs.add(x.bid);const n=subs.filter(y=>y.bid===x.bid).length;ev.push({at:x.ts,t:'<b>'+esc(x.member)+'</b> submitted <b>'+x.stage+'</b> ('+n+' documents) for <b>'+esc(x.ep)+'</b>'})}
+    if(x.upd)ev.push({at:x.upd,t:'<b>'+esc(x.member)+'</b> replaced “'+esc(x.item)+'” for <b>'+esc(x.ep)+'</b>'})});
+  audit.forEach(a=>ev.push({at:a.at,t:'Admin <b>'+esc(a.act)+'</b> '+(a.item?'“'+esc(a.item)+'” ':"")+'· <b>'+esc(a.ep||"")+'</b>'+(a.note?' <span class="mu">— '+esc(a.note)+'</span>':"")}));
+  ev.sort((a,b)=>b.at.localeCompare(a.at));
+  $("#act").innerHTML='<div class="card"><h2>Activity log</h2>'+(ev.length?'<ul class="lg">'+ev.slice(0,80).map(e=>'<li><span class="mu">'+esc(fmt(e.at))+'</span><div>'+e.t+'</div></li>').join("")+'</ul>':'<p class="mu">Nothing here yet.</p>')+'</div>';
+}
+function reminder(name,fn){
+  const m=subs.filter(x=>x.fn===fn&&epk(x.ep)===epk(name)),who=(m[0]&&m[0].member)||"team",rej=m.filter(x=>x.status==="rejected"),g=gaps().find(x=>x.e.fn===fn&&epk(x.e.name)===epk(name));
+  let t="Hi "+who+",\nGovernance update for "+name+" ("+fn+"):\n";
+  if(rej.length)t+="\nThese need a corrected file:\n"+rej.map(x=>"- "+x.item+(x.note?" — "+x.note:"")).join("\n")+"\n";
+  if(g)t+="\nNext submission: "+g.s+(g.d?" (due "+fd(g.d)+")":"")+"\n";
+  t+=(rej.length||g)?"\nPlease upload through the governance site. Thank you!":"\nEverything is up to date. Thank you!";
+  return t}
+async function copyText(t){try{await navigator.clipboard.writeText(t);await ask("Copied. Paste it into WhatsApp:\n\n"+t,"","info")}catch(e){await ask("Select and copy this reminder:\n\n"+t,"","info")}}
+async function report(){
+  const m=metrics(),T=(h,r)=>'<table><tr>'+h.map(x=>'<th>'+x+'</th>').join("")+'</tr>'+r.map(x=>'<tr>'+x.map(c=>'<td>'+c+'</td>').join("")+'</tr>').join("")+'</table>';
+  const B=new Map();subs.forEach(s=>{const k=epk(s.member),o=B.get(k)||{n:s.member,p:0,d:0};o.p+=s.pts;o.d++;B.set(k,o)});
+  const h='<!doctype html><html><head><meta charset="utf-8"><title>Governance report</title><style>body{font:15px system-ui,sans-serif;max-width:860px;margin:30px auto;padding:0 16px;color:#111}table{border-collapse:collapse;width:100%;margin:8px 0 24px}td,th{border-bottom:1px solid #ddd;padding:6px 8px;text-align:left}.k{display:flex;gap:12px;flex-wrap:wrap}.k div{flex:1;min-width:130px;border:1px solid #ddd;border-radius:8px;padding:10px}.k b{display:block;font-size:24px}</style></head><body><h1>Governance report</h1><p>'+fd(Date.now())+'</p><div class="k">'+kpis(m).map(x=>'<div><b>'+esc(x[0])+'</b>'+x[1]+'</div>').join("")+'</div><h2>Compliance by stage</h2>'+T(["Stage","Approved","In review","Not started"],m.stages.map(s=>[s.s,s.a,s.p,s.n]))+'<h2>Points leaderboard</h2>'+T(["#","Member","Documents","Points"],[...B.values()].sort((a,b)=>b.p-a.p).slice(0,10).map((o,i)=>[i+1,esc(o.n),o.d,o.p]))+'<h2>Most rejected documents</h2>'+T(["Document","Times rejected"],m.topRej.map(x=>[esc(x[0]),x[1]]))+'<h2>Needs attention</h2>'+T(["EP","Function","Next stage","Due","Days overdue"],m.G.slice(0,25).map(g=>[esc(g.e.name),g.e.fn,g.s,g.d?fd(g.d):"–",g.od||"–"]))+'</body></html>';
+  save("governance-report-"+new Date().toISOString().slice(0,10)+".html",new Blob([h],{type:"text/html"}));
+}
+$("#csv").onclick=()=>{const r=filtered(),q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const c=[["Date","EP","Function","Member","Stage","Document","Status","Note","Points","Files"]].concat(r.map(s=>[s.ts,s.ep,s.fn,s.member,s.stage,s.item,s.status,s.note,s.pts,(s.files||[]).length])).map(x=>x.map(q).join(",")).join("\n");
+  save("submissions.csv",new Blob(["\ufeff"+c],{type:"text/csv"}))};
+FL.forEach(i=>{$("#"+i).oninput=$("#"+i).onchange=renderAdmin});
+$("#rs").onclick=()=>{FL.forEach(i=>$("#"+i).value="");renderAdmin()};
+
+let allowed=[];
+async function loadAllowed(force){const{data}=await sb.from("allowed_emails").select("*").order("email");allowed=data||[];const t=$("#al");
+  if(force||document.activeElement!==t)t.value=allowed.map(x=>x.email+(x.name||x.role==="admin"?", "+(x.name||""):"")+(x.role==="admin"?", admin":"")).join("\n")}
+$("#als").onclick=async()=>{const m=$("#alm");m.textContent="";
+  try{const seen=new Map();for(const ln of $("#al").value.split("\n")){const p=ln.split(",").map(x=>x.trim()),em=(p[0]||"").toLowerCase();if(!/^\S+@\S+\.\S+$/.test(em))continue;seen.set(em,{email:em,name:p[1]||"",role:/^admin$/i.test(p[2]||"")?"admin":"member"})}
+    const self=(me.email||"").toLowerCase();seen.set(self,{...(seen.get(self)||{name:myName}),email:self,role:"admin"});
+    const rows=[...seen.values()],{error}=await sb.from("allowed_emails").upsert(rows);if(error)throw error;
+    const gone=allowed.filter(a=>!seen.has(a.email)).map(a=>a.email);
+    if(gone.length){const{error:e2}=await sb.from("allowed_emails").delete().in("email",gone);if(e2)throw e2}
+    m.textContent="Saved "+rows.length+" emails.";await loadAllowed(true)}catch(e){m.textContent="Couldn’t save: "+((e&&e.message)||"try again.")}};
+
+/* ---------- navigation & clicks ---------- */
+$("#t1").onclick=()=>tab(1);$("#t3").onclick=()=>tab(3);$("#t2").onclick=()=>tab(2);
+function tab(n){$("#v1").hidden=n!=1;$("#v2").hidden=n!=2;$("#v3").hidden=n!=3;["t1","t2","t3"].forEach((id,i)=>$("#"+id).classList.toggle("on",[1,2,3][i]==n));
+  if(n==2)showAdmin();if(me)refresh()}
+document.addEventListener("click",async e=>{
+  const t=e.target;if(t.id==="dlb")return dlFile(t.dataset.v,t.dataset.n);
+  if(t.id==="ov"||t.id==="ovx"){$("#ov").hidden=true;return}
+  const c=t.closest&&t.closest("[data-v],[data-rv],[data-del],[data-fix],[data-act],[data-rm],[data-rep],[data-sub],.fo");if(!c)return;
+  const d=c.dataset;
+  try{
+    if(d.v){$("#ovb").innerHTML=(d.p?'<iframe src="'+esc(d.v)+'"></iframe>':'<img src="'+esc(d.v)+'" alt="">')+'<button class="fb" id="dlb" data-v="'+esc(d.v)+'" data-n="'+esc(d.n||"file")+'">Download</button><span id="dlm" style="color:#fff"></span>';$("#ov").hidden=false}
+    else if(d.rv)await review([d.id],d.rv);
+    else if(d.del){if(await ask("Delete this document submission?","","confirm")){const s=subs.find(x=>x.id===d.del);if(s){await logA(s,"deleted");const{error}=await sb.from("submissions").delete().eq("id",s.id);if(error)throw error;await refresh()}}}
+    else if(d.fix){fixId=d.fix;$("#rp").click()}
+    else if(d.act)await act(d.act);
+    else if(d.rm){const i=d.rm.lastIndexOf("|");await copyText(reminder(d.rm.slice(0,i),d.rm.slice(i+1)))}
+    else if(d.rep)report();
+    else if(d.sub){sub=d.sub;showAdmin()}
+    else if(c.classList.contains("fo")){cur={ep:d.ep,fn:d.fn};$("#dash").hidden=true;$("#sub").hidden=true;$("#fv").hidden=false;renderFolder();window.scrollTo(0,0)}
+  }catch(x){await ask("That didn’t work: "+((x&&x.message)||"please try again."),"","info")}
+});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&me)refresh()});
+setInterval(()=>{if(me&&!document.hidden)refresh()},90000);
+
+</script></body></html>
